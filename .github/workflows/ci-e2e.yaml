@@ -19,18 +19,9 @@ jobs:
       - name: lima
         run: |
           limactl start --tty=false --name=bpfdev template://ubuntu-lts
-          limactl stop bpfdev
-          cat >> /Users/runner/.lima/bpfdev/config.yaml <<EOF
-          networks:
-             - lima: bridged
-             - lima: user-v2
-          EOF
-          brew install socket_vmnet
-          limactl sudoers >etc_sudoers.d_lima
-          sudo install -o root etc_sudoers.d_lima /etc/sudoers.d/lima
-          /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/libexec/bootpd
-          /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/libexec/bootpd
-          limactl start bpfdev
+          limactl start --tty=false --name=collector template://ubuntu-lts
           limactl shell bpfdev exec -- sudo apt-get install net-tools
+          limactl shell collector exec -- sudo apt-get install net-tools
+          limactl shell collector exec -- sudo apt-get install net-tools
           limactl shell bpfdev exec -- ifconfig -a
-
+          limactl shell collector exec -- ifconfig -a 
