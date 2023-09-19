@@ -19,6 +19,10 @@ jobs:
       - name: lima
         run: |
           limactl start --tty=false --name=bpfdev template://ubuntu-lts
-          limactl shell bpfdev exec -- hostname -I
-
+          limactl stop bpfdev
+          brew install socket_vmnet
+          limactl sudoers >etc_sudoers.d_lima
+          sudo install -o root etc_sudoers.d_lima /etc/sudoers.d/lima
+          limactl start bpfdev
+          limactl shell bpfdev exec -- ifconfig -a
 
