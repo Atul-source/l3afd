@@ -19,6 +19,6 @@ jobs:
       - name: lima
         run: |
           limactl start --tty=false --name=bpfdev template://ubuntu-lts
-          limactl shell bpfdev
+          limactl shell bpfdev exec -- hostname -I
 
 
