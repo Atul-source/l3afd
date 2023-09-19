@@ -19,9 +19,17 @@ jobs:
       - name: lima
         run: |
           limactl start --tty=false --name=bpfdev template://ubuntu-lts
-          limactl start --tty=false --name=collector template://ubuntu-lts
           limactl shell bpfdev exec -- sudo apt-get install net-tools
-          limactl shell collector exec -- sudo apt-get install net-tools
-          limactl shell collector exec -- sudo apt-get install net-tools
           limactl shell bpfdev exec -- ifconfig -a
-          limactl shell collector exec -- ifconfig -a 
+
+     - name: clone
+       run: |
+         limactl shell bpfdev exec -- sudo apt-get install git
+         limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3af-arch.git
+         limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3afd.git
+      
+    - name: run l3afd
+      run: |
+        limactl shell bpfdev exec -- cd l3af-arch/dev_environment
+        limactl shell bpfdev exec -- ./setup_linux_dev_env.sh
+
