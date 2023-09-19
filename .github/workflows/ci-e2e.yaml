@@ -10,42 +10,15 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - name: Enable VMX
+      - name: brew
         run: |
-          sudo apt-get install -y -qq cpu-checker
-          kvm-ok
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-      - name: setup_vms
+      - name: lima
         run: |
-          sudo apt-get update
-          sudo apt-get install virtualbox
-          sudo apt-get -y install vagrant
-          sudo apt-get install hey curl git
-          vagrant plugin install vagrant-reload
+          limactl start --tty=false --name=bpfdev template://ubuntu-lts
+          limactl shell bpfdev
 
-      - name: clone repo
-        run: |
-          git clone https://github.com/l3af-project/l3afd.git
-          git clone https://github.com/l3af-project/l3af-arch.git
 
-      - name: run vagrant
-        run: |
-          cd l3af-arch/dev_environment
-          cat > config.yaml << EOL
-          configs:
-              host_http_port1: '18080'
-              host_http_port2: '18081'
-              host_grafana_port: '33000'
-              host_prometheus_port: '39090'
-              host_l3af_config_port: '37080'
-              host_l3af_debug_port: '38899'
-              host_l3afd_code_dir: '../../l3afd'
-              traffic_mirroring: 'false'
-              host_distro_codename: 'jammy'
-          EOL
-          vagrant up
-
-      - name: run l3afvm
-        run: vagrant ssh l3af
