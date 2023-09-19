@@ -12,12 +12,14 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
+      - name: brew installation
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: setup_vms
         run: |
-          sudo apt-get update
-          sudo apt-get install virtualbox
-          sudo apt-get -y install vagrant
-          sudo apt-get install hey curl git
+          brew update
+          brew install --cask virtualbox vagrant
+          brew install hey curl git
           vagrant plugin install vagrant-reload
 
       - name: clone repo
