@@ -1,0 +1,57 @@
+# Copyright Contributors to the L3AF Project.
+# SPDX-License-Identifier: Apache-2.0
+#
+# For documentation on the github environment, see
+# https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+#
+# For documentation on the syntax of this file, see
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
+name: CI Ubuntu build
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: setup_vms
+        run: |
+          sudo apt-get install virtualbox
+          sudo apt-get -y install vagrant
+          sudo apt-get install hey curl git
+          vagrant plugin install vagrant-reload
+
+      - name: clone repo
+        run: |
+          git clone https://github.com/l3af-project/l3afd.git
+          git clone https://github.com/l3af-project/l3af-arch.git
+
+      - name: run vagrant
+        run: |
+          cd l3af-arch/dev_environment
+          cat > config.yaml << EOL
+        configs:
+            host_http_port1: '18080'
+            host_http_port2: '18081'
+            host_grafana_port: '33000'
+            host_prometheus_port: '39090'
+            host_l3af_config_port: '37080'
+            host_l3af_debug_port: '38899'
+            host_l3afd_code_dir: '~/l3afd'
+            traffic_mirroring: 'true'
+            host_distro_codename: 'jammy'
+          EOL
+          vagrant up
+      
+      - name: run l3afvm
+        run: vagrant ssh l3af
+
+
+
