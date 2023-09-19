@@ -24,7 +24,7 @@ jobs:
         networks:
           - lima: bridged
           - lima: user-v2
-          EOF
+        EOF
           brew install socket_vmnet
           limactl sudoers >etc_sudoers.d_lima
           sudo install -o root etc_sudoers.d_lima /etc/sudoers.d/lima
