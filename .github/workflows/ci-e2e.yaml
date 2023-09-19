@@ -10,16 +10,19 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: brew installation
+      - name: Enable VMX
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          sudo apt-get install -y -qq cpu-checker
+          kvm-ok
+
       - name: setup_vms
         run: |
-          brew update
-          brew install --cask virtualbox vagrant
-          brew install hey curl git
+          sudo apt-get update
+          sudo apt-get install virtualbox
+          sudo apt-get -y install vagrant
+          sudo apt-get install hey curl git
           vagrant plugin install vagrant-reload
 
       - name: clone repo
