@@ -37,7 +37,7 @@ jobs:
               host_l3af_config_port: '37080'
               host_l3af_debug_port: '38899'
               host_l3afd_code_dir: '../../l3afd'
-              traffic_mirroring: 'true'
+              traffic_mirroring: 'false'
               host_distro_codename: 'jammy'
           EOL
           vagrant up
