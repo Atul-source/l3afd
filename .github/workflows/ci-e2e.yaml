@@ -20,7 +20,7 @@ jobs:
         run: |
           limactl start --tty=false --name=bpfdev template://ubuntu-lts
           limactl stop bpfdev
-          cat >> .lima/bpfdev/config.yaml <<EOF
+          cat >> ~/.lima/bpfdev/config.yaml <<EOF
           networks:
              - lima: bridged
              - lima: user-v2
