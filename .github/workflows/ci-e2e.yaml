@@ -28,6 +28,8 @@ jobs:
           brew install socket_vmnet
           limactl sudoers >etc_sudoers.d_lima
           sudo install -o root etc_sudoers.d_lima /etc/sudoers.d/lima
+          /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/libexec/bootpd
+          /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/libexec/bootpd
           limactl start bpfdev
           limactl shell bpfdev exec -- sudo apt-get install net-tools
           limactl shell bpfdev exec -- ifconfig -a
