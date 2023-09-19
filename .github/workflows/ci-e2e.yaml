@@ -25,6 +25,7 @@ jobs:
       - name: clone
         run: |
           limactl shell bpfdev exec -- sudo apt-get install git
+          limactl shell bpfdev exec -- cd ~
           limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3af-arch.git
           limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3afd.git
       
