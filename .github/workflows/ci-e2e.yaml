@@ -18,13 +18,14 @@ jobs:
 
       - name: lima
         run: |
-          limactl start --tty=false --name=bpfdev --mount ~:~:rw template://ubuntu-lts
+          limactl start --tty=false --name=bpfdev template://ubuntu-lts
           limactl shell bpfdev exec -- sudo apt-get install net-tools
           limactl shell bpfdev exec -- ifconfig -a
 
       - name: clone
         run: |
           limactl shell bpfdev exec -- sudo apt-get install git
+          limactl shell bpfdev exec -- /usr/bin/bash -c "cd"
           limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3af-arch.git
           limactl shell bpfdev exec -- git clone https://github.com/l3af-project/l3afd.git
       
