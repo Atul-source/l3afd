@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - name: brew
         run: |
@@ -25,11 +26,13 @@ jobs:
       - name: clone
         run: |
           limactl shell bpfdev exec -- sudo apt-get install git
-          limactl shell bpfdev exec -- /usr/bin/bash -c "cd; pwd"
-          limactl shell bpfdev exec -- sudo git clone https://github.com/l3af-project/l3af-arch.git
-          limactl shell bpfdev exec -- sudo git clone https://github.com/l3af-project/l3afd.git
-      
+          limactl shell bpfdev exec -- /usr/bin/bash -c "cd"
+          limactl shell bpfdev exec -- sudo git clone -b E2E https://github.com/Atul-source/l3af-arch.git
+
       - name: run l3afd
         run: |
           limactl shell bpfdev exec -- /bin/bash -c "cd l3af-arch/dev_environment && sudo ./setup_linux_dev_env.sh"
-
+     
+      - name: stop l3afd
+        run: |
+          exit 0
