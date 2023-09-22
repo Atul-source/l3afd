@@ -20,8 +20,6 @@ jobs:
       - name: lima
         run: |
           limactl start --tty=false --name=bpfdev --mount-writable=true template://ubuntu-lts
-          limactl shell bpfdev exec -- sudo apt-get install net-tools
-          limactl shell bpfdev exec -- ifconfig -a
 
       - name: clone
         run: |
