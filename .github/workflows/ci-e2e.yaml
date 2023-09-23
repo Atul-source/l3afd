@@ -30,6 +30,6 @@ jobs:
       - name: run l3afd
         run: |
           limactl shell bpfdev exec -- /bin/bash -c "cd l3af-arch/dev_environment && sudo ./setup_linux_dev_env.sh"
-          limactl shell bpfdev exec -- sudo ./test_suite.sh
+          limactl shell bpfdev exec -- sudo bash /root/l3af-arch/dev_environment/e2e_test/test_suite.sh
           exit 0
           limactl stop bpfdev
