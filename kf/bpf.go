@@ -593,10 +593,6 @@ func (b *BPF) VerifyAndGetArtifacts(conf *config.Config) error {
 	return nil
 }
 
-func ipv4Dial(network, addr string) (net.Conn, error) {
-	return net.Dial("tcp4", addr)
-}
-
 // GetArtifacts downloads artifacts from the specified eBPF repo
 func (b *BPF) GetArtifacts(conf *config.Config) error {
 
@@ -630,7 +626,6 @@ func (b *BPF) GetArtifacts(conf *config.Config) error {
 			timeOut := time.Duration(conf.HttpClientTimeout) * time.Second
 			var netTransport = &http.Transport{
 				ResponseHeaderTimeout: timeOut,
-				Dial:                  ipv4Dial,
 			}
 			client := http.Client{Transport: netTransport, Timeout: timeOut}
 
