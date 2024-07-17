@@ -12,8 +12,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/l3af-project/l3afd/v2/apis"
@@ -22,6 +20,7 @@ import (
 	"github.com/l3af-project/l3afd/v2/config"
 	"github.com/l3af-project/l3afd/v2/models"
 	"github.com/l3af-project/l3afd/v2/pidfile"
+	"github.com/l3af-project/l3afd/v2/restart"
 	"github.com/l3af-project/l3afd/v2/stats"
 	"gopkg.in/natefinch/lumberjack.v2"
 
@@ -94,14 +93,15 @@ func main() {
 	}
 
 	if err = pidfile.CheckPIDConflict(conf.PIDFilename); err != nil {
-		log.Fatal().Err(err).Msgf("The PID file: %s, is in an unacceptable state", conf.PIDFilename)
+		// Now we need to trigger restart
+		restart.HandleRestart(conf)
 	}
 	if err = pidfile.CreatePID(conf.PIDFilename); err != nil {
 		log.Fatal().Err(err).Msgf("The PID file: %s, could not be created", conf.PIDFilename)
 	}
 
 	if runtime.GOOS == "linux" {
-		if err = checkKernelVersion(conf); err != nil {
+		if err = restart.CheckKernelVersion(conf); err != nil {
 			log.Fatal().Err(err).Msg("The unsupported kernel version please upgrade")
 		}
 	}
@@ -159,52 +159,6 @@ func SetupNFConfigs(ctx context.Context, conf *config.Config) (*bpfprogs.NFConfi
 	}
 
 	return nfConfigs, nil
-}
-
-func checkKernelVersion(conf *config.Config) error {
-	const minVerLen = 2
-
-	kernelVersion, err := getKernelVersion()
-	if err != nil {
-		return fmt.Errorf("failed to find kernel version: %v", err)
-	}
-
-	//validate version
-	ver := strings.Split(kernelVersion, ".")
-	if len(ver) < minVerLen {
-		return fmt.Errorf("expected minimum kernel version length %d and got %d, ver %+q", minVerLen, len(ver), ver)
-	}
-	major_ver, err := strconv.Atoi(ver[0])
-	if err != nil {
-		return fmt.Errorf("failed to find kernel major version: %v", err)
-	}
-	minor_ver, err := strconv.Atoi(ver[1])
-	if err != nil {
-		return fmt.Errorf("failed to find kernel minor version: %v", err)
-	}
-
-	if major_ver > conf.MinKernelMajorVer {
-		return nil
-	}
-	if major_ver == conf.MinKernelMajorVer && minor_ver >= conf.MinKernelMinorVer {
-		return nil
-	}
-
-	return fmt.Errorf("expected Kernel version >=  %d.%d", conf.MinKernelMajorVer, conf.MinKernelMinorVer)
-}
-
-func getKernelVersion() (string, error) {
-	osVersion, err := os.ReadFile("/proc/version")
-	if err != nil {
-		return "", fmt.Errorf("failed to read procfs: %v", err)
-	}
-	var u1, u2, kernelVersion string
-	_, err = fmt.Sscanf(string(osVersion), "%s %s %s", &u1, &u2, &kernelVersion)
-	if err != nil {
-		return "", fmt.Errorf("failed to scan procfs version: %v", err)
-	}
-
-	return kernelVersion, nil
 }
 
 func ReadConfigsFromConfigStore(conf *config.Config) ([]models.L3afBPFPrograms, error) {
