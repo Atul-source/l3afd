@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/cilium/ebpf"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/aggregates"
 	"github.com/l3af-project/l3afd/v2/models"
 	"github.com/rs/zerolog/log"
 )
@@ -62,6 +63,51 @@ func (b *BPFMap) RemoveMissingKeys(args []models.KeyValue) error {
 				return fmt.Errorf("delete key failed with error %w, mapid %d", err, b.MapID)
 			}
 		}
+	}
+	return nil
+}
+
+// The RemoveMissingKeys function is used to delete missing entries of eBPF maps, which are used by eBPF Programs.
+func (b *BPFMap) GetAllKeyValues() error {
+	ebpfMap, err := ebpf.NewMapFromID(b.MapID)
+	if err != nil {
+		return fmt.Errorf("access new map from ID failed %w", err)
+	}
+	defer ebpfMap.Close()
+	var key, nextKey int
+	for {
+		err := ebpfMap.NextKey(unsafe.Pointer(&key), unsafe.Pointer(&nextKey))
+		if err != nil {
+			if errors.Is(err, ebpf.ErrKeyNotExist) {
+				break
+			} else {
+				return fmt.Errorf("get next key failed with error %w, mapid %d", err, b.MapID)
+			}
+		}
+		key = nextKey
+		var value int64
+		if err = ebpfMap.Lookup(unsafe.Pointer(&key), unsafe.Pointer(&value)); err != nil {
+			log.Warn().Err(err).Msgf("GetValue Lookup failed : Name %s ID %d", b.Name, b.MapID)
+			return nil
+		}
+		ebpfMap
+		var retVal float64
+		switch aggregator {
+		case "scalar":
+			retVal = float64(value)
+		case "max-rate":
+			b.Values = b.Values.Next()
+			b.Values.Value = math.Abs(float64(float64(value) - b.LastValue))
+			b.LastValue = float64(value)
+			retVal = b.MaxValue()
+		case "avg":
+			b.Values.Value = value
+			b.Values = b.Values.Next()
+			retVal = b.AvgValue()
+		default:
+			log.Warn().Msgf("unsupported aggregator %s and value %d", b.Aggregator, value)
+		}
+		return retVal
 	}
 	return nil
 }
